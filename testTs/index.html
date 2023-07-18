@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>test ts</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>test ts</h1>
+      <button class="add">随机添加</button>
+      <table class="mytable">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>preview</th>
+            <th>height</th>
+            <th>width</th>
+            <th>url</th>
+            <th>delete</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr>
+            <td>id:</td>
+            <td><img src="01.webp" /></td>
+            <td>height:</td>
+            <td>width:</td>
+            <td>url:</td>
+            <td><a href="#" class="delete">X</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script src="script.js"></script>
+  </body>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .add {
+      padding: 10px;
+    }
+    .mytable {
+      border-collapse: collapse;
+    }
+    .mytable td,
+    .mytable th {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    .mytable tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .mytable tr:hover {
+      background-color: #ddd;
+    }
+    .mytable th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #4caf50;
+      color: white;
+    }
+    img {
+      width: 80px;
+      height: auto;
+    }
+  </style>
+</html>
