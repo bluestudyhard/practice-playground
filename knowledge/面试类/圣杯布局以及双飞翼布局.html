@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="header"></div>
+      <div class="center">center</div>
+      <div class="left">left</div>
+      <div class="right">right</div>
+      <div class="footer"></div>
+    </div>
+  </body>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .wrapper {
+      width: 100%;
+      height: 100vh;
+    }
+    .header {
+      width: 100%;
+      height: 100px;
+      background-color: #696969;
+    }
+    .footer {
+      width: 100%;
+      height: 100px;
+      background-color: #636363;
+    }
+    .left {
+      width: 100px;
+      margin-left: -100%;
+      height: 100px;
+      float: left;
+      background: rebeccapurple;
+    }
+    .center {
+      overflow: hidden;
+      background: rgb(119, 119, 234);
+      height: 100px;
+      width: 100%;
+    }
+    .right {
+      width: 100px;
+      height: 100px;
+      float: right;
+      margin-right: -100px;
+      background: rgb(234, 119, 119);
+    }
+  </style>
+</html>

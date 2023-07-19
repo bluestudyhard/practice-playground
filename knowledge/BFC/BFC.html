@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="box">
+      <div class="box-1">解决两者的margin差问题</div>
+      <div class="box-2">box2</div>
+    </div>
+    <div class="wrapper">
+      <div class="div1"></div>
+    </div>
+    <div class="div2"></div>
+    <div class="left">经典左右布局</div>
+    <div class="right">右内容</div>
+    <div class="div3">
+      清除浮动
+      <div class="son1"></div>
+      <div class="son2"></div>
+    </div>
+  </body>
+  <style>
+    .box {
+      width: 200px;
+      height: 200px;
+      background: #aaa9a9;
+      border: 1px solid;
+      display: flex;
+      flex-direction: column;
+    }
+    .box-1 {
+      width: 100px;
+      height: 100px;
+      border: 1px solid;
+      margin-bottom: 10px;
+      background: #3bd1f3;
+    }
+    .box-2 {
+      width: 100px;
+      height: 100px;
+      border: 1px solid;
+      margin-top: 20px;
+      background: #5ae173;
+    }
+    .wrapper {
+      /* 开启BFC */
+      overflow: hidden;
+    }
+
+    .div1 {
+      width: 100px;
+      height: 100px;
+      background-color: green;
+      margin-bottom: 10px;
+    }
+
+    .div2 {
+      width: 100px;
+      height: 100px;
+      background-color: red;
+      margin-top: 20px;
+    }
+    .left {
+      width: 20vw;
+      height: 70vh;
+      float: left;
+      background: #b976f7;
+    }
+    .right {
+      width: 80vw;
+      height: 70vh;
+      background: #3bd1f3;
+    }
+    .div3 {
+      width: 100px;
+      background: #3bd1f3;
+      border: 1px solid;
+      overflow: hidden;
+    }
+    .son1 {
+      width: 50px;
+      height: 50px;
+      background: #5ae173;
+      float: left;
+    }
+    .son2 {
+      height: 100px;
+    }
+  </style>
+</html>
