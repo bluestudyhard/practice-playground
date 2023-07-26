@@ -433,7 +433,7 @@ export const searchService = {
 
 ![Alt text](image-3.png)
 
-我们需要配置好 ts 文件后，在 app.ts 中进行全局注册,然后就可以愉快的使用啦~
+- 我们需要配置好 ts 文件后，在 app.ts 中进行全局注册,然后就可以愉快的使用啦~
 
 ```js {.line-numbers}
 import { setupConfig } from "@ngify/http";
