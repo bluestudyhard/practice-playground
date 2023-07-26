@@ -430,7 +430,9 @@ export const searchService = {
 
 在使用 Taro+Vue+vant 构建微信小程序时，我们需要配置微信的请求服务器，否则会报错 `XMLHttpRequest is not a constructor`
 这个我在网上找了挺久，最后发现原来在 node_modules 包里的 README 里有详细介绍。。。
+
 ![Alt text](image-3.png)
+
 我们需要配置好 ts 文件后，在 app.ts 中进行全局注册,然后就可以愉快的使用啦~
 
 ```js {.line-numbers}
