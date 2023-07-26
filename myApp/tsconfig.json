@@ -21,7 +21,8 @@
     "typeRoots": ["node_modules/@types"],
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["sass"]
   },
   "include": ["./src", "./types"],
   "compileOnSave": false

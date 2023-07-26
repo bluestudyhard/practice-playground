@@ -1,3 +1,5 @@
+[toc]
+
 ## Rx.js 的概念和个人理解
 
 [rxjs](https://rxjs.tech/guide/observable)，从本质上来说就是用来操作流的工具库，什么是流呢，比如说在一个在线学堂，我的观众数，提问数之类的数据都不是一开始就有的，而是随着时间产生的，那么这些数据集就是流，Rxjs 就是为了处理这些流而产生的工具，可以进行流的截断(unsubscribe),延迟(setTimeout),防抖(debounceTime)。
@@ -21,11 +23,41 @@ RxJS 中解决异步事件管理的基本概念有：
 
 ## Observables
 
-### 什么是 Observables
+可以理解为是流，数据流的集合，但是和它和函数是不一样的，它可以根据时间，返回不同的结果，所以官方定义为 "**对函数的泛化**"
+用法很简单，这里面其实用到的是迭代器的思想
+Observable 执行可以传递三种类型的值：
+Next 通知：发送数值、字符串、对象等。
+Error 通知：发送 JavaScript 错误或异常。
+Complete（完成）通知：不发送值。
+observable 可以使用 subscribe 来订阅，订阅其实就是相当于调用一个函数，返回一个结果
+以下是对上面概念的一个小小的示例，具体示例在在[stackblitz](https://stackblitz.com/edit/rxjs-xrbhmp?file=index.html,style.css,index.ts)的注释部分，这是我当时学习时练习的地方
 
-可以理解为就是数据流，不同于
+```js {.line-numbers}
+const stream$ = new Observable((subscriber) => {
+  subscriber.next([1, 2, 3]);
+  setTimeout(() => {
+    subscriber.next("hello,blue");
+  }, 2000);
+  setTimeout(() => {
+    subscriber.next({ name: "blue", age: 12 });
+  }, 3000);
+  setTimeout(() => {
+    subscriber.complete();
+  }, 5000);
+});
+subscribe 就是启动这个流
+const subscription1 = stream$.subscribe({
+  complete: () => {
+    console.log('done');
+  },
+  next: (n) => console.log(n,new Date().getTime() - now, 'stream1 ms'),
+  error: (e) => console.log(e),
+});
+```
 
 ## Observer
+
+Observer 是 Observable 传递的各个值的消费者，明白这句话就行了
 
 ## Operators 操作符
 
@@ -148,6 +180,58 @@ fromEvent(button, "click")
 
 - 设置节流时间，即多少 ms 内不能发送相同的请求
 
+#### distinctUntilChanged()
+
+- 它用于过滤掉连续重复的值，只发出与前一个值不同的值。也就是说会过滤掉相邻重复的两个请求
+  比如说 of(1,2,2,3)，那么经过它以后输出的流就是 1,2,3
+
+```js {.line-numbers}
+import { of } from "rxjs";
+import { distinctUntilChanged } from "rxjs/operators";
+
+const source = of(1, 1, 2, 2, 3, 1, 1, 4);
+
+source.pipe(distinctUntilChanged()).subscribe((value) => {
+  console.log(value);
+});
+// 1,2,3,1,4
+```
+
+- distinctUntilChanged() 还可以接收一个比较函数作为可选参数，用于自定义值的比较逻辑。比较函数接收两个参数，表示前一个值和当前值，并返回一个布尔值来指示是否认为这两个值是相同的。
+
+```js {.line-numbers}
+import { of } from "rxjs";
+import { distinctUntilChanged } from "rxjs/operators";
+
+const source = of(
+  { id: 1, name: "John" },
+  { id: 2, name: "Jane" },
+  { id: 1, name: "John" },
+  { id: 3, name: "Alice" }
+);
+
+  .pipe(distinctUntilChanged((prev, curr) => prev.id === curr.id))
+  .subscribe((value) => {
+    console.log(value);
+  });
+```
+
+### tap() 主要用于调试
+
+- tap()可以用于 watch 流，有问题的时候或者需要在特定的某个节点时执行操作时使用，或者跑出错误
+
+```js {.line-numbers}
+const source = of(1, 2, 3, 4, 5);
+
+source.pipe(
+  tap((n) => {
+    if (n > 3) {
+      throw new TypeError(`Value ${n} is greater than 3`);
+    }
+  })
+);
+```
+
 ## Subject
 
 它是一个特殊的 Observable，同时也是一个观察者。Subject 既可以作为数据源（Observable），也可以作为数据的消费者（观察者），其实就是一个多播的 Observable
@@ -188,3 +272,174 @@ const subscription2 = subject.subscribe((value) => {
 ```
 
 Subject 可用于多个订阅者之间的通信和数据共享。它在许多场景下非常有用，例如事件总线、状态管理等。
+
+## Rxjs 通常用于解决问题的场景
+
+接下来我将结合我的搜索框示例，结合 ngify 来实现 rxjs 通常使用的情景
+**demo** 在[search](https://mypage.blueltytblog.top/#/)
+RXjs 一般用于简化请求逻辑，将大量的请求转换为简单的数据流来处理，然后我发现在搜索框中基本可以使用到 rxjs 的所有功能
+
+- **输入防抖&&过滤请求**
+  ![Alt text](image.png)
+
+- **搜索相关栏&&搜索建议**
+  比如我们在使用谷歌搜索时，会根据用户输入的字数给出相关的搜索结果以及搜索建议，如果每一次都发送新的请求的话会造成大量的资源浪费，我们可以使用 rxjs 的方法来控制用户输入的一段时间内发送请求
+
+```js {.line-numbers}
+.pipe(
+      debounceTime(800), // 设置节流时间
+      distinctUntilChanged(), // 直到有新的输入才会创建新的流
+      filter(term => term !== ''), // 过滤掉空字符串
+      switchMap(term => searchService.search(term)), // 切换到新的流
+      takeUntil(cancelSearch)
+    )
+```
+
+- 最后是搜索框的实现代码
+  我在具体实现过程中发现，如果使用@iput 事件的话会造成多次重复请求，比如说我输入 aaaa，理应只有一次请求，但实际的结果是 4 次，而且我需要解决，点击除搜索框区域外的其他地方，相关搜索结果清空，取消订阅，以及在搜索框为空时立刻取消订阅的一些方法
+
+```````js {.line-numbers}
+      <form method="get" action="https://www.bing.com/search?" target="_blank">
+      <input
+        type="search"
+        v-model="searchTerm"
+        ref="searchType"
+        @focus="changeFocus"
+        @blur="missFocus"
+        class="search-body"
+        placeholder="请输入内容"
+        name="q"
+        autocomplete="off"
+      />
+    </form>
+
+`````` js
+onMounted(() => {
+  fromEvent(searchType.value, "input")
+    .pipe(
+      map((event) => event.target.value),
+      tap((term) => {
+        if (term === "") {
+          cancleSubscribe();
+        }
+      }),
+      debounceTime(800), // 设置节流时间
+      distinctUntilChanged(), // 直到有新的输入才会创建新的流
+      filter((term) => term !== ""), // 过滤掉空字符串
+      switchMap((term) => searchService.search(term)) // 切换到新的流
+    )
+    .subscribe((results) => {
+      searchResults.value = results;
+    });
+  // 除了点击搜索框，其他地方点击都会取消订阅
+  fromEvent(document, "click")
+    .pipe(
+      tap((e) => {
+        if (e.target !== searchType.value) {
+          cancleSubscribe();
+        }
+      })
+    )
+    .subscribe();
+});
+```````
+
+![Alt text](image-1.png)
+
+## 使用 ngify 发送 http 请求
+
+@ngify/http 的目标与 axios 相似：提供一个类似独立的服务，以便在 Angular 之外使用，不同于 axios，ngify 返回的值是一个 observable
+
+### 安装
+
+```js {.line-numbers}
+npm i @ngify/http
+
+```
+
+### 基本用法
+
+就以常用的 get 和举例就好了，其实这里有一个大坑，发送带请求头的请求的时候被坑了
+在我发送请求时，我发现，在我的 apikey 正确的情况下一直报错 apikey 的问题，经过调试后发现，原来是没有正确的附带请求头
+![Alt text](f30bded91cb715683791a8cb5003fc4.png)
+那 ok，我去查官方文档，发现具体参数如下
+
+```js {.line-numbers}
+get(url, params?, options?): Observable<HttpResponse<ArrayBuffer>>
+```
+
+那我照葫芦画瓢，发现还是报错
+
+```js {.line-numbers}
+const headers = {
+  "Ocp-Apim-Subscription-Key": apiKey,
+};
+export const searchService = {
+  search(term) {
+    const url = `https://api.bing.microsoft.com/v7.0/search?q=${encodeURIComponent(
+      term
+    )}`;
+    return http
+      .get(url, { headers: new HttpHeaders(headers) })
+      .subscribe((res) => console.log(res));
+  },
+};
+```
+
+其实问题出在，在 ts 下，options 是第三个参数，另外两个是可选参数，所以如果不需要请求体而需要请求头的话，**需要将不用的参数以`null` 补充**
+
+```js {.line-numbers}
+return from(http.get(url, null, { headers: headers }));
+```
+
+博客的示意用法其实举的例子很不好，没有将相关的参数说明，而且参数例子很草率。。。
+![Alt text](image-2.png)
+
+### 搜索框的具体请求
+
+在 vue 中最好只是单独的实现页面逻辑和 ui，我将请求服务放在了 searchService.ts 中来单独处理服务
+在下面的代码中，我们将搜索结果得到后以 Observable 导出，然后在 vue 中处理相关逻辑就可以了
+
+```js {.line-numbers}
+const http = new HttpClient();
+const apiKey: string | undefined = Bing_SEARCH_API_KEY;
+
+const headers: any = {
+  "Ocp-Apim-Subscription-Key": apiKey,
+};
+export const searchService = {
+  search(term: string | number | boolean) {
+    if (term === "") return;
+    const url: string = `https://api.bing.microsoft.com/v7.0/search?q=${encodeURIComponent(
+      term
+    )}`;
+    return from(http.get(url, null, { headers: headers })).pipe(
+      map((response: any) => response.webPages.value)
+    );
+  },
+};
+```
+
+### 在 wx 中使用 ngify
+
+在使用 Taro+Vue+vant 构建微信小程序时，我们需要配置微信的请求服务器，否则会报错 `XMLHttpRequest is not a constructor`
+这个我在网上找了挺久，最后发现原来在 node_modules 包里的 README 里有详细介绍。。。
+![Alt text](image-3.png)
+我们需要配置好 ts 文件后，在 app.ts 中进行全局注册,然后就可以愉快的使用啦~
+
+```js {.line-numbers}
+import { setupConfig } from "@ngify/http";
+import { HttpWxBackend } from "@ngify/http/wx";
+/* 在node_MODULES中找到@ngify,里面有针对微信小程序的http服务器的配置，导入http/wx就好
+ * 然后在app.ts中调用这个函数
+ */
+export function setupNgifyConfig() {
+  setupConfig({
+    backend: new HttpWxBackend(),
+  });
+}
+// app.ts
+import { setupNgifyConfig } from "./services/ngifyconfig";
+
+setupNgifyConfig();
+```

@@ -183,3 +183,44 @@ export default definePageConfig({
   },
 });
 ```
+
+## 自己的一些上手实践
+
+由于之前有小程序的开发经验，对于一些 api 和规范我就没有怎么看了，使用一下 vant 做一些小 demo，配置一下路由就差不多了
+完整代码在[https://github.com/bluestudyhard/TaroProject]
+
+### 图片上传功能
+
+在 Taro 中使用文件上传功能首先得安装` "@tarojs/taro";` 官方文档又双叒叕没说，否则会 Taro `undefinded`，具体的使用看文档就可以了
+
+```js {.line-numbers}
+import Taro from "@tarojs/taro";
+function chooseImage() {
+  Taro.chooseImage({
+    count: 1,
+    sizeType: ["original", "compressed"],
+    sourceType: ["album", "camera"],
+    success: function (res) {
+      // tempFilePath可以作为img标签的src属性显示图片
+      const tempFilePaths = res.tempFilePaths;
+      console.log(tempFilePaths);
+      imgUrl.value = tempFilePaths;
+    },
+  });
+}
+```
+
+![Alt text](image-3.png)
+
+### 路由跳转可以直接使用 Taro.navigateTo
+
+然后可以根据需要配置 router.ts 文件
+当然可以使用 vue 的 router，但是我发现用 Taro 自带的也很方便
+
+```js {.line-numbers}
+const jump = () => {
+  Taro.navigateTo({
+    url: "/pages/product/product",
+  });
+};
+```
